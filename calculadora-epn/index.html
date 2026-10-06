@@ -1,748 +1,143 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Calculadora de Aprobación · EPN</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg-0:#070b1a;
-    --bg-1:#0d1330;
-    --gold:#ffc93c;
-    --gold-2:#ff9f1c;
-    --blue:#3d8bff;
-    --pass:#22c55e;
-    --warn:#f59e0b;
-    --fail:#f43f5e;
-    --text:#eef2ff;
-    --muted:#a5b0d0;
-    --glass:rgba(255,255,255,.07);
-    --stroke:rgba(255,255,255,.14);
-    --radius:26px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html, body { height: 100%; }
-
-  body {
-    font-family: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
-    color: var(--text);
-    background: radial-gradient(1200px 700px at 15% -10%, #16306b 0%, transparent 55%),
-                radial-gradient(1000px 600px at 110% 10%, #4a1d6e 0%, transparent 55%),
-                radial-gradient(900px 900px at 50% 120%, #0b3d3a 0%, transparent 60%),
-                linear-gradient(160deg, #070b1a 0%, #0a1030 50%, #060818 100%);
-    min-height: 100vh;
-    overflow-x: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 18px;
-    position: relative;
-  }
-
-  /* ---------- animated aurora background ---------- */
-  .blob {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(90px);
-    opacity: .45;
-    z-index: 0;
-    pointer-events: none;
-    animation: float 18s ease-in-out infinite;
-  }
-  .blob.b1 { width: 420px; height: 420px; background: #2f6bff; top: -120px; left: -100px; }
-  .blob.b2 { width: 380px; height: 380px; background: #b026ff; bottom: -140px; right: -80px; animation-delay: -6s; }
-  .blob.b3 { width: 300px; height: 300px; background: #ffb703; bottom: 15%; left: -120px; opacity: .28; animation-delay: -11s; }
-
-  @keyframes float {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33%      { transform: translate(50px, -40px) scale(1.12); }
-    66%      { transform: translate(-30px, 35px) scale(.94); }
-  }
-
-  .stars {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image:
-      radial-gradient(1.6px 1.6px at 20% 30%, rgba(255,255,255,.8), transparent),
-      radial-gradient(1.4px 1.4px at 70% 20%, rgba(255,255,255,.6), transparent),
-      radial-gradient(1.8px 1.8px at 85% 65%, rgba(255,255,255,.55), transparent),
-      radial-gradient(1.4px 1.4px at 40% 80%, rgba(255,255,255,.6), transparent),
-      radial-gradient(1.2px 1.2px at 10% 70%, rgba(255,255,255,.5), transparent),
-      radial-gradient(1.5px 1.5px at 55% 50%, rgba(255,255,255,.45), transparent);
-    animation: twinkle 6s ease-in-out infinite alternate;
-  }
-  @keyframes twinkle { from { opacity: .35; } to { opacity: .9; } }
-
-  /* ---------- layout ---------- */
-  .app {
-    position: relative;
-    z-index: 2;
-    width: min(980px, 100%);
-    display: grid;
-    grid-template-columns: 1.05fr .95fr;
-    gap: 22px;
-    align-items: start;
-  }
-
-  .card {
-    background: var(--glass);
-    border: 1px solid var(--stroke);
-    border-radius: var(--radius);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 24px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12);
-    padding: 30px;
-    position: relative;
-    overflow: hidden;
-  }
-  .card::before {
-    content: "";
-    position: absolute; inset: 0;
-    background: linear-gradient(140deg, rgba(255,255,255,.12), transparent 40%);
-    pointer-events: none;
-  }
-
-  .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
-  .crest {
-    width: 52px; height: 52px; flex: none;
-    border-radius: 16px;
-    display: grid; place-items: center;
-    font-size: 26px;
-    background: linear-gradient(135deg, #ffd166, #f59e0b 55%, #ef7d00);
-    box-shadow: 0 8px 24px rgba(245,158,11,.45);
-    animation: crestPulse 3.5s ease-in-out infinite;
-  }
-  @keyframes crestPulse {
-    0%,100% { box-shadow: 0 8px 24px rgba(245,158,11,.4); transform: rotate(0deg); }
-    50%     { box-shadow: 0 10px 34px rgba(245,158,11,.75); transform: rotate(-4deg); }
-  }
-  .brand h1 {
-    font-size: clamp(20px, 2.6vw, 27px);
-    line-height: 1.15;
-    letter-spacing: .3px;
-    font-weight: 700;
-    background: linear-gradient(90deg, #ffffff, #ffd88a 60%, #8fd0ff);
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .brand .uni { font-size: 12.5px; color: var(--muted); letter-spacing: 1.6px; text-transform: uppercase; font-weight: 600; }
-
-  .subtitle { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 14px 0 22px; }
-
-  /* ---------- inputs ---------- */
-  .field { margin-bottom: 18px; }
-  .field label {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 13px; font-weight: 600; letter-spacing: .4px;
-    color: #dbe4ff; margin-bottom: 9px;
-  }
-  .field label .max { color: var(--muted); font-weight: 500; font-size: 12px; }
-
-  .input-wrap { position: relative; }
-  input[type="number"] {
-    width: 100%;
-    padding: 15px 62px 15px 18px;
-    font-family: inherit;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text);
-    background: rgba(9,14,35,.6);
-    border: 1.5px solid rgba(255,255,255,.14);
-    border-radius: 16px;
-    outline: none;
-    transition: .25s;
-    -moz-appearance: textfield;
-  }
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  input[type="number"]:focus {
-    border-color: var(--blue, #4d8dff);
-    box-shadow: 0 0 0 4px rgba(77,141,255,.22);
-    background: rgba(9,14,35,.85);
-  }
-  input[type="number"].invalid { border-color: var(--fail); box-shadow: 0 0 0 4px rgba(244,63,94,.2); }
-  .suffix {
-    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-    font-size: 14px; color: var(--muted); font-weight: 600; pointer-events: none;
-  }
-
-  .hint { font-size: 11.5px; color: #8fa0c8; margin-top: 7px; letter-spacing: .2px; }
-  .error { font-size: 12px; color: #ff9db0; margin-top: 7px; min-height: 15px; font-weight: 500; }
-
-  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-  .chip {
-    font-family: inherit; font-size: 12px; font-weight: 600;
-    padding: 8px 13px; border-radius: 999px; cursor: pointer;
-    color: #cfe0ff; background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.14);
-    transition: .2s;
-  }
-  .chip:hover { background: rgba(255,255,255,.15); transform: translateY(-2px); color: #fff; }
-
-  .btn-row { display: flex; gap: 10px; margin-top: 22px; }
-  .btn {
-    flex: 1; font-family: inherit; font-size: 14.5px; font-weight: 700; letter-spacing: .4px;
-    padding: 15px 18px; border-radius: 16px; cursor: pointer; border: none;
-    transition: .22s; position: relative; overflow: hidden;
-  }
-  .btn-primary {
-    color: #1a1200;
-    background: linear-gradient(135deg, #ffe08a, #ffb703 45%, #ff9500);
-    box-shadow: 0 12px 30px rgba(255,166,0,.38);
-  }
-  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(255,166,0,.5); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-ghost {
-    flex: 0 0 auto; color: var(--muted); background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.15); padding: 15px 20px;
-  }
-  .btn-ghost:hover { color: #fff; background: rgba(255,255,255,.15); }
-
-  /* ---------- result ---------- */
-  .result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
-  .result-head h2 { font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 700; }
-
-  .gauge-wrap { display: grid; place-items: center; margin: 6px 0 4px; position: relative; }
-  .gauge { width: min(270px, 74%); height: auto; overflow: visible; }
-  .gauge .track { fill: none; stroke: rgba(255,255,255,.09); stroke-width: 16; }
-  .gauge .prog {
-    fill: none; stroke-width: 16; stroke-linecap: round;
-    stroke: url(#grad);
-    transition: stroke-dashoffset .9s cubic-bezier(.22,1,.36,1), stroke .5s;
-    filter: drop-shadow(0 0 8px rgba(77,141,255,.5));
-  }
-  .gauge .tick { stroke: rgba(255,255,255,.5); stroke-width: 3; stroke-linecap: round; }
-  .gauge .tick-label { fill: #cbd6f5; font-size: 13px; font-weight: 700; font-family: inherit; }
-  .gauge .tick-cap { fill: #93a2ce; font-size: 10.5px; font-weight: 600; font-family: inherit; letter-spacing: .5px; }
-
-  .center {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -54%);
-    text-align: center; width: 60%;
-  }
-  .center .score { font-size: clamp(38px, 6vw, 50px); font-weight: 800; line-height: 1; letter-spacing: -1px; }
-  .center .score span { font-size: 19px; font-weight: 600; color: var(--muted); }
-  .center .of { font-size: 11.5px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
-
-  .verdict {
-    margin-top: 6px;
-    border-radius: 20px;
-    padding: 20px 20px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,.16);
-    background: rgba(255,255,255,.06);
-    transition: .45s;
-    animation: pop .5s cubic-bezier(.34,1.56,.64,1);
-  }
-  @keyframes pop { 0% { transform: scale(.93); opacity: .3; } 100% { transform: scale(1); opacity: 1; } }
-  .verdict .icon { font-size: 40px; line-height: 1; display: block; margin-bottom: 8px; }
-  .verdict .title {
-    font-size: clamp(21px, 3.4vw, 27px); font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
-  }
-  .verdict .desc { font-size: 13.5px; color: #d5ddf5; margin-top: 8px; line-height: 1.55; }
-  .verdict .req { display: inline-block; margin-top: 12px; font-size: 12px; font-weight: 600; letter-spacing: .5px;
-    padding: 7px 14px; border-radius: 999px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.16); }
-
-  .verdict.pass  { background: linear-gradient(150deg, rgba(34,197,94,.28), rgba(34,197,94,.08)); border-color: rgba(34,197,94,.55); box-shadow: 0 16px 44px rgba(34,197,94,.22); }
-  .verdict.pass .title { color: #7dffb6; text-shadow: 0 0 22px rgba(34,197,94,.6); }
-  .verdict.remedial { background: linear-gradient(150deg, rgba(245,158,11,.28), rgba(245,158,11,.08)); border-color: rgba(245,158,11,.55); box-shadow: 0 16px 44px rgba(245,158,11,.22); }
-  .verdict.remedial .title { color: #ffd166; text-shadow: 0 0 22px rgba(245,158,11,.6); }
-  .verdict.fail { background: linear-gradient(150deg, rgba(244,63,94,.28), rgba(244,63,94,.08)); border-color: rgba(244,63,94,.55); box-shadow: 0 16px 44px rgba(244,63,94,.22); }
-  .verdict.fail .title { color: #ff9db0; text-shadow: 0 0 22px rgba(244,63,94,.6); }
-  .verdict.idle { opacity: .78; }
-
-  /* ---------- rules ---------- */
-  .rules { margin-top: 20px; display: grid; gap: 10px; }
-  .rule {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 14px; border-radius: 15px;
-    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
-    font-size: 13px; transition: .25s;
-  }
-  .rule .dot { width: 11px; height: 11px; border-radius: 50%; flex: none; box-shadow: 0 0 12px currentColor; }
-  .rule b { font-weight: 700; letter-spacing: .3px; }
-  .rule .range { margin-left: auto; color: var(--muted); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
-  .rule.active { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.35); transform: translateX(4px); }
-  .rule:nth-child(1) .dot { background: var(--pass); color: var(--pass); }
-  .rule:nth-child(2) .dot { background: var(--warn); color: var(--warn); }
-  .rule:nth-child(3) .dot { background: var(--fail); color: var(--fail); }
-
-  .formula {
-    margin-top: 16px; text-align: center; font-size: 12.5px; color: var(--muted);
-    letter-spacing: .4px; padding: 12px; border-radius: 14px;
-    background: rgba(0,0,0,.25); border: 1px dashed rgba(255,255,255,.16);
-  }
-  .formula b { color: #ffd88a; }
-
-  /* ---------- audio button ---------- */
-  .audio-btn {
-    position: fixed; top: 20px; right: 20px; z-index: 20;
-    display: flex; align-items: center; gap: 9px;
-    font-family: inherit; font-size: 13px; font-weight: 700; letter-spacing: .5px;
-    padding: 11px 17px; border-radius: 999px; cursor: pointer;
-    color: #0a1030; border: none;
-    background: linear-gradient(135deg, #9ee7ff, #4d8dff);
-    box-shadow: 0 12px 30px rgba(77,141,255,.45);
-    transition: .25s;
-  }
-  .audio-btn:hover { transform: translateY(-3px) scale(1.03); }
-  .audio-btn.off { background: rgba(255,255,255,.1); color: var(--muted); border: 1px solid rgba(255,255,255,.2); box-shadow: none; }
-  .eq { display: flex; align-items: flex-end; gap: 2.5px; height: 15px; }
-  .eq i { width: 3.5px; background: currentColor; border-radius: 2px; height: 4px; }
-  .audio-btn.on .eq i { animation: bounce .9s ease-in-out infinite; }
-  .audio-btn.on .eq i:nth-child(2) { animation-delay: .15s; }
-  .audio-btn.on .eq i:nth-child(3) { animation-delay: .3s; }
-  .audio-btn.on .eq i:nth-child(4) { animation-delay: .45s; }
-  @keyframes bounce { 0%,100% { height: 4px; } 50% { height: 15px; } }
-
-  footer { grid-column: 1 / -1; text-align: center; color: #7e8cb5; font-size: 11.5px; letter-spacing: .6px; margin-top: 4px; }
-
-  @media (max-width: 900px) {
-    .app { grid-template-columns: 1fr; }
-    .audio-btn span.txt { display: none; }
-    .audio-btn { padding: 12px; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition-duration: .01ms !important; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Calculadora de aprobación de cursos - Escuela Politécnica Nacional" />
+  <meta name="theme-color" content="#062a6e" />
+  <title>Calculadora de Aprobación · EPN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
-<div class="blob b1"></div>
-<div class="blob b2"></div>
-<div class="blob b3"></div>
-<div class="stars"></div>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="stars"></div>
 
-<button id="audioBtn" class="audio-btn off" aria-pressed="false">
-  <span class="eq"><i></i><i></i><i></i><i></i></span>
-  <span class="txt">Música</span>
-</button>
+  <button id="audioBtn" class="audio-btn off" aria-pressed="false" aria-label="Activar o desactivar música de fondo">
+    <span class="eq"><i></i><i></i><i></i><i></i></span>
+    <span class="txt">Música</span>
+  </button>
 
-<main class="app">
-  <!-- ============ INPUT CARD ============ -->
-  <section class="card">
-    <div class="brand">
-      <div class="crest">🎓</div>
-      <div>
-        <div class="uni">Escuela Politécnica Nacional</div>
-        <h1>Calculadora de Aprobación</h1>
+  <main class="app">
+
+    <!-- ============ TARJETA DE INGRESO ============ -->
+    <section class="card">
+      <div class="brand">
+        <div class="crest">🎓</div>
+        <div>
+          <div class="uni">Escuela Politécnica Nacional</div>
+          <h1>Calculadora de Aprobación</h1>
+        </div>
       </div>
-    </div>
 
-    <p class="subtitle">
-      Ingresa las notas de <b>Primer</b> y <b>Segundo Corte</b> (cada una sobre 20).
-      El sistema evalúa el acumulado sobre 40 y determina si apruebas, vas a remedial o repruebas.
-    </p>
+      <p class="subtitle">
+        Ingresa las notas del <b>Primer Bimestre</b> y el <b>Segundo Bimestre</b> (cada una sobre 20).
+        El sistema evalúa el acumulado sobre 40 y determina si apruebas, presentas examen supletorio o repruebas.
+      </p>
 
-    <div class="field">
-      <label for="n1">Nota — Primer Corte <span class="max">máx. 20.00</span></label>
-      <div class="input-wrap">
-        <input id="n1" type="number" inputmode="decimal" min="0" max="20" step="0.01" placeholder="0.00" autocomplete="off" />
-        <span class="suffix">/ 20</span>
+      <form id="gradeForm" novalidate>
+        <div class="field">
+          <label for="n1">Nota — Primer Bimestre <span class="max">máx. 20.00</span></label>
+          <div class="input-wrap">
+            <input id="n1" name="n1" type="number" inputmode="decimal" min="0" max="20" step="0.01"
+                   placeholder="0.00" autocomplete="off" />
+            <span class="suffix">/ 20</span>
+          </div>
+          <div class="error" id="e1" role="alert"></div>
+        </div>
+
+        <div class="field">
+          <label for="n2">Nota — Segundo Bimestre <span class="max">máx. 20.00</span></label>
+          <div class="input-wrap">
+            <input id="n2" name="n2" type="number" inputmode="decimal" min="0" max="20" step="0.01"
+                   placeholder="0.00" autocomplete="off" />
+            <span class="suffix">/ 20</span>
+          </div>
+          <div class="error" id="e2" role="alert"></div>
+        </div>
+
+        <div class="btn-row">
+          <button type="submit" class="btn btn-primary">Calcular resultado</button>
+          <button type="button" class="btn btn-ghost" id="clearBtn">Limpiar</button>
+        </div>
+      </form>
+
+      <div class="formula">Fórmula EPN: <b>Nota I + Nota II = Total / 40</b></div>
+    </section>
+
+    <!-- ============ TARJETA DE RESULTADO ============ -->
+    <section class="card">
+      <div class="result-head">
+        <h2>Resultado en vivo</h2>
+        <span id="statusPill" class="pill">—</span>
       </div>
-      <div class="error" id="e1"></div>
-    </div>
 
-    <div class="field">
-      <label for="n2">Nota — Segundo Corte <span class="max">máx. 20.00</span></label>
-      <div class="input-wrap">
-        <input id="n2" type="number" inputmode="decimal" min="0" max="20" step="0.01" placeholder="0.00" autocomplete="off" />
-        <span class="suffix">/ 20</span>
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 240 240" role="img" aria-label="Indicador de nota acumulada sobre 40">
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%"   stop-color="#4d8dff" />
+              <stop offset="55%"  stop-color="#1253d4" />
+              <stop offset="100%" stop-color="#ef1b3d" />
+            </linearGradient>
+          </defs>
+
+          <circle class="track" cx="120" cy="120" r="74" />
+          <circle class="prog" id="prog" cx="120" cy="120" r="74"
+                  transform="rotate(-90 120 120)"
+                  stroke-dasharray="464.96" stroke-dashoffset="464.96" />
+
+          <!-- línea de supletorio: 18 -->
+          <line class="tick" x1="146.0" y1="199.9" x2="149.7" y2="211.3" />
+          <text class="tick-label" x="163" y="228" text-anchor="middle">18</text>
+          <!-- línea de aprobación: 28 -->
+          <line class="tick" x1="40.1" y1="146.0" x2="28.7" y2="149.7" />
+          <text class="tick-label" x="24" y="152" text-anchor="middle">28</text>
+
+          <text class="tick-cap" x="120" y="238" text-anchor="middle">SUPLETORIO</text>
+          <text class="tick-cap" x="62"  y="58"  text-anchor="middle">APROBADO</text>
+        </svg>
+
+        <div class="center">
+          <div class="score"><span id="total">0</span><span> / 40</span></div>
+          <div class="of">Acumulado</div>
+        </div>
       </div>
-      <div class="error" id="e2"></div>
-    </div>
 
-    <div class="chips">
-      <button class="chip" data-a="17" data-b="10">17 + 10 (remedial)</button>
-      <button class="chip" data-a="15" data-b="13">15 + 13 (aprobado)</button>
-      <button class="chip" data-a="9"  data-b="8">9 + 8 (reprobado)</button>
-      <button class="chip" data-a="20" data-b="20">20 + 20 (perfecto)</button>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" id="calcBtn">Calcular resultado</button>
-      <button class="btn btn-ghost" id="clearBtn">Limpiar</button>
-    </div>
-
-    <div class="formula">Fórmula EPN: <b>Nota I + Nota II = Total / 40</b></div>
-  </section>
-
-  <!-- ============ RESULT CARD ============ -->
-  <section class="card">
-    <div class="result-head">
-      <h2>Resultado en vivo</h2>
-      <span id="statusPill" style="font-size:12px;color:var(--muted);font-weight:600;">—</span>
-    </div>
-
-    <div class="gauge-wrap">
-      <svg class="gauge" viewBox="0 0 240 240" role="img" aria-label="Indicador de nota acumulada">
-        <defs>
-          <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%"  stop-color="#4d8dff" />
-            <stop offset="55%" stop-color="#22d3ee" />
-            <stop offset="100%" stop-color="#ffd166" />
-          </linearGradient>
-        </defs>
-
-        <circle class="track" cx="120" cy="120" r="74" />
-        <circle class="prog" id="prog" cx="120" cy="120" r="74"
-                transform="rotate(-90 120 120)"
-                stroke-dasharray="464.96" stroke-dashoffset="464.96" />
-
-        <!-- cut-off tick: 18 -->
-        <line class="tick" x1="146.0" y1="199.9" x2="149.7" y2="211.3" />
-        <text class="tick-label" x="163" y="228" text-anchor="middle">18</text>
-        <!-- cut-off tick: 28 -->
-        <line class="tick" x1="40.1" y1="146.0" x2="28.7" y2="149.7" />
-        <text class="tick-label" x="24" y="152" text-anchor="middle">28</text>
-
-        <text class="tick-cap" x="120" y="238" text-anchor="middle">REMEDIAL</text>
-        <text class="tick-cap" x="60"  y="60"  text-anchor="middle">APROBADO</text>
-      </svg>
-
-      <div class="center">
-        <div class="score"><span id="total">0</span><span> / 40</span></div>
-        <div class="of">Acumulado</div>
+      <div class="verdict idle" id="verdict" aria-live="polite">
+        <span class="icon" id="vIcon">🧮</span>
+        <div class="title" id="vTitle">Ingresa tus notas</div>
+        <div class="desc" id="vDesc">El resultado se muestra automáticamente mientras escribes.</div>
+        <span class="req" id="vReq">Aprueba desde 28/40</span>
       </div>
-    </div>
 
-    <div class="verdict idle" id="verdict">
-      <span class="icon" id="vIcon">🧮</span>
-      <div class="title" id="vTitle">Ingresa tus notas</div>
-      <div class="desc" id="vDesc">El resultado se muestra automáticamente mientras escribes.</div>
-      <span class="req" id="vReq">Aprueba desde 28/40</span>
-    </div>
-
-    <div class="rules">
-      <div class="rule" data-rule="pass">
-        <span class="dot"></span>
-        <b>Aprobado</b>
-        <span class="range">Total ≥ 28 / 40</span>
+      <div class="rules">
+        <div class="rule" data-rule="pass">
+          <span class="dot"></span>
+          <b>Aprobado</b>
+          <span class="range">Total ≥ 28 / 40</span>
+        </div>
+        <div class="rule" data-rule="remedial">
+          <span class="dot"></span>
+          <b>Examen supletorio</b>
+          <span class="range">18 ≤ Total &lt; 28</span>
+        </div>
+        <div class="rule" data-rule="fail">
+          <span class="dot"></span>
+          <b>Reprobado</b>
+          <span class="range">Total &lt; 18 / 40</span>
+        </div>
       </div>
-      <div class="rule" data-rule="remedial">
-        <span class="dot"></span>
-        <b>Examen de remedial</b>
-        <span class="range">18 ≤ Total &lt; 28</span>
-      </div>
-      <div class="rule" data-rule="fail">
-        <span class="dot"></span>
-        <b>Reprobado</b>
-        <span class="range">Total &lt; 18 / 40</span>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <footer>Hecho con HTML · CSS · JavaScript — demo académica sin conexión a servidores</footer>
-</main>
+    <footer>Hecho con HTML · CSS · JavaScript — demo académica sin conexión a servidores</footer>
+  </main>
 
-<script>
-(() => {
-  "use strict";
-
-  /* =========================================================
-     1. NÚCLEO DE CÁLCULO  (requisitos de aprobación EPN)
-     ========================================================= */
-  const PASS = 28;   // suma >= 28  -> aprobado
-  const REM  = 18;   // suma >= 18  -> examen de remedial
-  const MAX_EACH = 20;
-
-  function evaluate(n1, n2) {
-    const total = Math.round((n1 + n2) * 100) / 100;
-    if (total >= PASS) return { state: "pass",     total };
-    if (total >= REM)  return { state: "remedial", total };
-    return               { state: "fail",     total };
-  }
-
-  const COPY = {
-    pass: {
-      icon: "🏆", title: "Aprobado",
-      desc: "¡Felicidades! Superaste la nota mínima de aprobación del curso.",
-      req: "Requisito cumplido: ≥ 28 / 40", pill: "APROBADO", color: "#7dffb6"
-    },
-    remedial: {
-      icon: "📖", title: "Examen de Remedial",
-      desc: "Alcanzaste el mínimo para presentar el examen de remedial. Prepárate y apruébalo.",
-      req: "Rango habilitado: 18 – 27.99 / 40", pill: "REMEDIAL", color: "#ffd166"
-    },
-    fail: {
-      icon: "📉", title: "Reprobado",
-      desc: "No alcanzaste el mínimo exigido. Repites el curso.",
-      req: "Mínimo exigido: 18 / 40", pill: "REPROBADO", color: "#ff9db0"
-    },
-    idle: {
-      icon: "🧮", title: "Ingresa tus notas",
-      desc: "El resultado se muestra automáticamente mientras escribes.",
-      req: "Aprueba desde 28/40", pill: "—", color: "#a5b0d0"
-    }
-  };
-
-  /* =========================================================
-     2. UI
-     ========================================================= */
-  const $ = (id) => document.getElementById(id);
-  const n1 = $("n1"), n2 = $("n2"), e1 = $("e1"), e2 = $("e2");
-  const totalEl = $("total"), prog = $("prog"), verdict = $("verdict");
-  const vIcon = $("vIcon"), vTitle = $("vTitle"), vDesc = $("vDesc"),
-        vReq = $("vReq"), statusPill = $("statusPill"), rules = document.querySelectorAll(".rule");
-
-  const CIRC = 2 * Math.PI * 74; // 464.96
-  let lastState = null;
-
-  function readValue(input, errEl) {
-    const raw = input.value.trim();
-    if (raw === "") { errEl.textContent = ""; input.classList.remove("invalid"); return null; }
-    const v = Number(raw);
-    if (!Number.isFinite(v)) { errEl.textContent = "Valor no numérico."; input.classList.add("invalid"); return null; }
-    if (v < 0 || v > MAX_EACH) {
-      errEl.textContent = `La nota debe estar entre 0 y ${MAX_EACH}.`;
-      input.classList.add("invalid");
-      return Math.min(MAX_EACH, Math.max(0, v)); // se usa como apoyo visual, pero se marca error
-    }
-    errEl.textContent = "";
-    input.classList.remove("invalid");
-    return v;
-  }
-
-  function hasError() {
-    return e1.textContent !== "" || e2.textContent !== "";
-  }
-
-  function render() {
-    const a = n1.value.trim() === "" ? null : Number(n1.value);
-    const b = n2.value.trim() === "" ? null : Number(n2.value);
-    const va = readValue(n1, e1);
-    const vb = readValue(n2, e2);
-
-    const ready = a !== null && b !== null && !hasError();
-    const res = ready ? evaluate(clamp(a), clamp(b)) : null;
-    const total = res ? res.total : 0;
-
-    // animación del número
-    animateNumber(totalEl, total);
-
-    // gauge
-    const ratio = res ? Math.min(total / 40, 1) : 0;
-    prog.style.strokeDashoffset = String(CIRC * (1 - ratio));
-
-    const state = res ? res.state : "idle";
-    const copy = COPY[state];
-    verdict.className = "verdict " + state;
-    vIcon.textContent = copy.icon;
-    vTitle.textContent = copy.title;
-    vDesc.textContent = copy.desc;
-    vReq.textContent = copy.req;
-    statusPill.textContent = copy.pill;
-    statusPill.style.color = copy.color;
-
-    // resaltar regla activa
-    rules.forEach(r => r.classList.toggle("active", res && r.dataset.rule === state));
-
-    if (res && state !== lastState) {
-      if (lastState !== null) AudioFX.chime(state);
-      lastState = state;
-    }
-    if (!res) lastState = null;
-  }
-
-  const clamp = (v) => Math.min(MAX_EACH, Math.max(0, v));
-
-  let animFrame = null;
-  function animateNumber(el, target) {
-    const from = Number(el.textContent) || 0;
-    if (Math.abs(from - target) < 0.01) { el.textContent = target.toFixed(target % 1 ? 2 : 0); return; }
-    cancelAnimationFrame(animFrame);
-    const start = performance.now(), dur = 550;
-    const step = (t) => {
-      const p = Math.min((t - start) / dur, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      const val = from + (target - from) * eased;
-      el.textContent = (p === 1 ? target : val).toFixed(2);
-      if (p < 1) animFrame = requestAnimationFrame(step);
-    };
-    animFrame = requestAnimationFrame(step);
-  }
-
-  [n1, n2].forEach(i => i.addEventListener("input", render));
-
-  $("calcBtn").addEventListener("click", () => {
-    render();
-    if (hasError()) { (e1.textContent ? n1 : n2).focus(); return; }
-    AudioFX.uiClick();
-    verdict.style.animation = "none";
-    void verdict.offsetWidth;
-    verdict.style.animation = "";
-    verdict.scrollIntoView({ behavior: "smooth", block: "center" });
-  });
-
-  $("clearBtn").addEventListener("click", () => {
-    n1.value = ""; n2.value = "";
-    e1.textContent = ""; e2.textContent = "";
-    n1.classList.remove("invalid"); n2.classList.remove("invalid");
-    render();
-    n1.focus();
-  });
-
-  document.querySelectorAll(".chip").forEach(c => {
-    c.addEventListener("click", () => {
-      n1.value = c.dataset.a;
-      n2.value = c.dataset.b;
-      render();
-      AudioFX.uiClick();
-    });
-  });
-
-  // evitar que el navegador acepte fuera de rango silenciosamente
-  [n1, n2].forEach(i => i.addEventListener("blur", () => {
-    if (i.value.trim() !== "") {
-      const v = Number(i.value);
-      if (Number.isFinite(v)) i.value = clamp(v).toFixed(2);
-      render();
-    }
-  }));
-
-  /* =========================================================
-     3. AUDIO AMBIENTE (Web Audio API, sin archivos externos)
-     ========================================================= */
-  const AudioFX = (() => {
-    let ctx = null, master = null, filter = null;
-    let playing = false, timer = null;
-    let nextChordTime = 0, chordIndex = 0;
-
-    // Progresión suave: Cmaj9 → Am9 → Fmaj9 → G6  (ambientes relajantes)
-    const CHORDS = [
-      [261.63, 329.63, 392.00, 493.88, 587.33], // C
-      [220.00, 261.63, 329.63, 392.00, 493.88], // Am
-      [174.61, 220.00, 261.63, 329.63, 392.00], // F
-      [196.00, 246.94, 293.66, 392.00, 440.00]  // G
-    ];
-    const CHORD_LEN = 5.2;
-    const BELL = [523.25, 587.33, 659.25, 783.99, 880.00];
-
-    function init() {
-      if (ctx) return;
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return;
-      ctx = new AC();
-      master = ctx.createGain();
-      master.gain.value = 0;
-      filter = ctx.createBiquadFilter();
-      filter.type = "lowpass";
-      filter.frequency.value = 2100;
-      filter.Q.value = 0.6;
-      filter.connect(master);
-      master.connect(ctx.destination);
-    }
-
-    function pad(freq, t) {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sine";
-      o.frequency.value = freq * (1 + (Math.random() * 0.003 - 0.0015));
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.075, t + 1.8);
-      g.gain.setValueAtTime(0.075, t + CHORD_LEN - 2.2);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + CHORD_LEN + 0.6);
-      o.connect(g); g.connect(filter);
-      o.start(t); o.stop(t + CHORD_LEN + 0.7);
-    }
-
-    function bell(freq, t, vol = 0.05) {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      const sub = ctx.createOscillator();
-      o.type = "sine"; o.frequency.value = freq;
-      sub.type = "triangle"; sub.frequency.value = freq / 2;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 2.4);
-      o.connect(g); sub.connect(g); g.connect(filter);
-      o.start(t); o.stop(t + 2.5);
-      sub.start(t); sub.stop(t + 2.5);
-    }
-
-    function scheduleChord(t) {
-      const chord = CHORDS[chordIndex];
-      chord.forEach((f, i) => setTimeout(() => playing && ctx && pad(f, Math.max(ctx.currentTime, t)), i * 90));
-      if (chordIndex % 2 === 0) bell(BELL[chordIndex % BELL.length], t + 1.4, 0.045);
-      else bell(BELL[(chordIndex + 2) % BELL.length], t + 2.6, 0.035);
-      chordIndex = (chordIndex + 1) % CHORDS.length;
-    }
-
-    function loop() {
-      if (!ctx || !playing) return;
-      while (nextChordTime < ctx.currentTime + 2.5) {
-        scheduleChord(nextChordTime);
-        nextChordTime += CHORD_LEN;
-      }
-    }
-
-    function start() {
-      init();
-      if (!ctx) return false;
-      if (ctx.state === "suspended") ctx.resume();
-      playing = true;
-      nextChordTime = ctx.currentTime + 0.15;
-      master.gain.cancelScheduledValues(ctx.currentTime);
-      master.gain.setTargetAtTime(0.5, ctx.currentTime, 1.2);
-      loop();
-      timer = setInterval(loop, 700);
-      return true;
-    }
-
-    function stop() {
-      playing = false;
-      if (timer) { clearInterval(timer); timer = null; }
-      if (ctx && master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.35);
-    }
-
-    function chime(state) {
-      if (!ctx || !playing) return;
-      const t = ctx.currentTime + 0.02;
-      const seq = state === "pass" ? [523.25, 659.25, 783.99, 1046.5]
-                : state === "remedial" ? [440, 554.37, 659.25]
-                : [392, 349.23, 293.66];
-      seq.forEach((f, i) => bell(f, t + i * 0.11, state === "fail" ? 0.04 : 0.06));
-    }
-
-    function uiClick() {
-      if (!ctx || !playing) return;
-      bell(880, ctx.currentTime + 0.01, 0.035);
-    }
-
-    return { start, stop, chime, uiClick, isPlaying: () => playing };
-  })();
-
-  const audioBtn = $("audioBtn");
-  let musicOn = false;
-
-  function setMusic(on) {
-    musicOn = on;
-    if (on) AudioFX.start(); else AudioFX.stop();
-    audioBtn.classList.toggle("on", on);
-    audioBtn.classList.toggle("off", !on);
-    audioBtn.setAttribute("aria-pressed", String(on));
-    audioBtn.querySelector(".txt").textContent = on ? "Música activa" : "Música";
-  }
-
-  audioBtn.addEventListener("click", () => setMusic(!musicOn));
-
-  // Primer gesto del usuario: enciende la música automáticamente (política de autoplay)
-  const firstGesture = () => {
-    document.removeEventListener("pointerdown", firstGesture);
-    document.removeEventListener("keydown", firstGesture);
-    if (!musicOn) setMusic(true);
-  };
-  document.addEventListener("pointerdown", firstGesture, { once: true });
-  document.addEventListener("keydown", firstGesture, { once: true });
-
-  // render inicial
-  render();
-})();
-</script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>
