@@ -25,7 +25,7 @@
 
     if (total >= PASS) return { state: "pass", total };
     // Examen supletorio: 18 <= total < 28
-    if (total >= MIN_SUPLETORIO && total < PASS) return { state: "remedial", total };
+    if (total >= MIN_SUPLETORIO && total < PASS) return { state: "remedial", total }; // examen supletorio
     return { state: "fail", total };
   }
 
@@ -38,7 +38,7 @@
     },
     remedial: {
       icon: "📖", title: "Examen Supletorio",
-      desc: "Tu acumulado está en el rango de supletorio (18 ≤ Total < 28): calificas para presentarlo.",
+      desc: "Tu acumulado entra en el rango de supletorio (18 ≤ Total < 28): calificas para presentarlo.",
       req: "Rango habilitado: 18 ≤ Total < 28",
       pill: "SUPLETORIO"
     },
